@@ -1,24 +1,28 @@
 var AM = new AssetManager();
 
+const MAX_SIZE = 100000;
+
 function Creature(game, id) {
 	//hexString = yourNumber.toString(16);
 	//and reverse the process with:
 	//yourNumber = parseInt(hexString, 16);
     this.game = game;
-    this.x = 768 * Math.random();
-    this.y = 768 * Math.random();
+    this.badLuck = Math.floor(Math.random() * 10);
+    this.area = 2500;
+    this.radius = Math.sqrt(this.area / Math.PI);
+    this.x = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
+    this.y = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
     this.removeFromWorld = false;
 	this.id = id;
 	this.layer = 2;
-    this.radius = 20;
-    this.red = 0;
-    this.green = 0;
-    this.blue = 0;
-    this.alpha = 1;
-    this.speed = 300;
+    this.red = Math.floor(Math.random() * 155) + 100;
+    this.green = Math.floor(Math.random() * 55) + 200;
+    this.blue = Math.floor(Math.random() * 100) + 155;
+    this.alpha = 0.3;
+    this.speed = 50;
     this.direction = 2 * Math.PI * Math.random();
-    this.area = Math.PI * this.radius * this.radius;
-    this.mitosisArea = 80;
+    this.deathArea = 100 * Math.PI;
+    this.mitosisArea = 1500;
     this.dna = "10011100";
 }
 
@@ -29,6 +33,12 @@ Creature.prototype.draw = function (tick, ctx) {
         if (this.loop) this.elapsedTime = 0;
     }
     var frame = this.currentFrame();
+    ctx.fillStyle = "rgba(255, 255, 255, " + this.alpha + ")";
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius + this.radius * 0.2, 0, Math.PI*2, true); 
+    ctx.closePath();
+    ctx.fill();
+    
     ctx.fillStyle = "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, true); 
@@ -37,26 +47,31 @@ Creature.prototype.draw = function (tick, ctx) {
 }
 
 Creature.prototype.update = function () {
-	this.red = Math.floor(Math.random() * 255);
-	this.green = Math.floor(Math.random() * 255);
-	this.blue = Math.floor(Math.random() * 255);
-	this.alpha = Math.floor(Math.random() * 255);
+	//this.red = Math.floor(Math.random() * 255);
+	//this.green = Math.floor(Math.random() * 255);
+	//this.blue = Math.floor(Math.random() * 255);
+	//this.alpha += .001 * Math.random();
+	console.log("Radius: " + this.radius + "     Area: " + this.area);
+	if(Math.floor(Math.random() * 10) <= this.badLuck ) {
+		this.area -= (this.area * this.area / MAX_SIZE) * Math.random();
+		this.radius = Math.sqrt(this.area / Math.PI);
+	}
 	
 	if(this.x > 768 - this.radius) {
-		this.direction = (this.direction + Math.PI) % (2 * Math.PI);
-		this.x -= this.game.clockTick * this.speed;
+		this.direction = (Math.PI - this.direction) % (2 * Math.PI);
+		this.x += this.game.clockTick * (this.speed * Math.cos(this.direction));
 	}
 	else if (this.x < this.radius) {
-		this.direction = (this.direction + Math.PI) % (2 * Math.PI);
-		this.x += this.game.clockTick * this.speed;
+		this.direction = (Math.PI - this.direction) % (2 * Math.PI);
+		this.x += this.game.clockTick * (this.speed * Math.cos(this.direction));
 	}
 	if(this.y > 768 - this.radius) {
-		this.direction = (this.direction + Math.PI) % (2 * Math.PI);
-		this.y -= this.game.clockTick * this.speed;
+		this.direction = ((2 * Math.PI) - this.direction) % (2 * Math.PI);
+		this.y += this.game.clockTick * (this.speed * Math.sin(this.direction));
 	}
 	else if (this.y < this.radius) {
-		this.direction = (this.direction + Math.PI) % (2 * Math.PI);
-		this.y += this.game.clockTick * this.speed;
+		this.direction = ((2 * Math.PI) - this.direction) % (2 * Math.PI);
+		this.y += this.game.clockTick * (this.speed * Math.sin(this.direction));
 	}
 	//this.direction = (this.direction + .1) % (2 * Math.PI);
 	this.x += this.game.clockTick * (this.speed * Math.cos(this.direction));
@@ -100,7 +115,7 @@ AM.downloadAll(function () {
     gameEngine.start();
 
     gameEngine.addCreature(new Background(gameEngine, AM.getAsset("./img/Cell_Background.png")));
-    for(var i = 0; i < 1000; i++) {
+    for(var i = 0; i < 10; i++) {
     	gameEngine.addCreature(new Creature(gameEngine, i));
     }
     

@@ -12,6 +12,7 @@ window.requestAnimFrame = (function () {
 
 function GameEngine() {
     this.entities = [];
+    this.entitiesCount = 0;
     this.ctx = null;
 }
 
@@ -35,6 +36,7 @@ GameEngine.prototype.start = function () {
 GameEngine.prototype.addCreature = function (creature) {
     console.log('added creature');
     this.entities.push(creature);
+    this.entitiesCount++;
 }
 
 GameEngine.prototype.draw = function () {
@@ -47,7 +49,15 @@ GameEngine.prototype.draw = function () {
         	return x.layer - y.layer;
         }
     );
+
+    //kill creatures that are too small to live
+    for (var i = 0; i < this.entities.length; i++) {
+    	if(this.entities[i].area < this.entities[i].deathArea) {
+    		this.entities.splice(i, 1);
+    	}
+    }
     
+    //draw creatures
     for (var i = 0; i < this.entities.length; i++) {
     	this.entities[i].draw(this.tick, this.ctx);
     }
