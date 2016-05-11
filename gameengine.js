@@ -13,11 +13,16 @@ window.requestAnimFrame = (function () {
 function GameEngine() {
     this.entities = [];
     this.entitiesCount = 0;
+    this.im = null;
+    this.click = null;
     this.ctx = null;
 }
 
 GameEngine.prototype.init = function (ctx) {
     this.ctx = ctx;
+    this.im = new InputManager("CreatureInfo", ctx);
+    this.im.addMouse();
+    this.im.start();
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
     this.timer = new Timer();
@@ -39,42 +44,99 @@ GameEngine.prototype.addCreature = function (creature) {
     this.entitiesCount++;
 }
 
-GameEngine.prototype.draw = function () {
-    this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
-    
-    //Sort entities by layer
-    this.entities.sort(
-        function(x, y)
-        {
-        	return x.layer - y.layer;
-        }
-    );
-
-    //kill creatures that are too small to live
-    for (var i = 0; i < this.entities.length; i++) {
-    	if(this.entities[i].area < this.entities[i].deathArea) {
-    		this.entities.splice(i, 1);
-    	}
-    }
-    
-    //draw creatures
-    for (var i = 0; i < this.entities.length; i++) {
-    	this.entities[i].draw(this.tick, this.ctx);
-    }
-}
-
 GameEngine.prototype.update = function () {
     var entitiesCount = this.entities.length;
-
+    
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
         entity.update();
     }
 }
 
+GameEngine.prototype.deleteTheDead = function () {
+
+    //kill creatures that are too small to live or eaten
+    for (var i = 0; i < this.entities.length; i++) {
+    	if(this.entities[i].markedForDeath) {
+    		this.entities.splice(i, 1);
+    	}
+    }
+}
+
+GameEngine.prototype.collision = function () {
+    var entitiesCount = this.entities.length;
+    
+    //for each creature
+    for (var i = 0; i < entitiesCount; i++) {
+    	//check it against all other creatures
+    	for(var j = 0; j < entitiesCount; j++) {
+    		//check only if your not checking itself
+    		if(i !== j) {
+    			var you = this.entities[i];
+    			var them = this.entities[j];
+    			if(hitEachother(you, them)) {
+    				you.collide(them);
+    			}
+    		}
+    	}
+    }
+}
+
+GameEngine.prototype.addPlants = function () {
+	if(Math.random() > 0.95) this.addCreature(new Creature(this, 1111, 1));
+}
+
+GameEngine.prototype.draw = function () {
+    
+    //Sort entities by layer
+    this.entities.sort(
+        function(x, y)
+        {
+        	return x.species - y.species;
+        }
+    );
+    
+	if(this.im.checkMouse()) {
+		click = this.im.getClick();
+	}
+    
+    //draw creatures and check user click
+    for (var i = 0; i < this.entities.length; i++) {
+    	this.entities[i].draw(this.tick, this.ctx);
+    	if(this.im.checkMouse()) {
+    		var entity = this.entities[i];
+    		click = this.im.getClick();
+    		console.log((click !== null) + " " + hitEachother(entity, click));
+    		if(click !== null && hitEachother(entity, click)) {
+				alert(entity.toString());
+				this.im.resetClick();
+			}
+    	}
+    }
+}
+
+var hitEachother = function (entity1, entity2) {
+	//alert("in hitEachother");
+	if(entity1 !== null && entity2 !== null) {
+		var deltaX = entity2.x-entity1.x;
+		var deltaY = entity1.y-entity2.y;
+		var sigmaRadii = entity1.radius+entity2.radius;
+//		if(!(Math.pow(sigmaRadii, 2) > 0)) {
+//			alert(entity1.id + " " + entity2.id);
+//		}
+		return Math.pow(deltaX, 2) + Math.pow(deltaY, 2) <= Math.pow(sigmaRadii, 2);
+	}
+	else {
+		return false;
+	}
+}
+
 GameEngine.prototype.loop = function () {
     this.clockTick = this.timer.tick();
     this.update();
+    this.deleteTheDead();
+    this.collision();
+    this.addPlants();
     this.draw();
 }
 
