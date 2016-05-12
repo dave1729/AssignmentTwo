@@ -9,6 +9,7 @@ function Creature(game, id, species) {
     this.game = game;
 	this.id = id;
     this.species = species;
+    this.setColor();
     
 //    this.area = 400
 //    if(this.species !== 1) this.area += 1000 + (500 * species);
@@ -19,25 +20,34 @@ function Creature(game, id, species) {
     this.radius = Math.sqrt(this.area / Math.PI);
     this.x = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
     this.y = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
-    this.setColor();
     this.speed = 0;
     if(this.species !== 1) this.speed = 60;
     this.direction = 2 * Math.PI * Math.random();
 	this.markedForDeath = false;
     this.badLuck = Math.floor(Math.random() * 10);
-    this.dna = "10011100";
+    //this.dna = "10011100";
 }
 
 Creature.prototype.setColor = function () {
-	if(this.species > 3) { // Dark Green
+	if(this.species > 4) { // Dark Green
+		this.red = (this.species * 997) % 255;
+    	this.green = (this.species * 1009) % 255;
+    	this.blue = (this.species * 1777) % 255;
+        this.alpha = 0.6;
+        
+	    this.area = 500 * this.species + 500;
+	    this.deathArea = 500 * this.species - 500;
+	    this.mitosisArea = 500 * this.species + 600;
+	}
+		else if(this.species > 3) { // Dark Green
 		this.red = 10;
     	this.green = 75;
     	this.blue = 55;
         this.alpha = 0.6;
         
-//	    this.area = 400;
-//	    this.deathArea = 100 * Math.PI;
-//	    this.mitosisArea = this.area + 100;
+	    this.area = 2000;
+	    this.deathArea = 1400;
+	    this.mitosisArea = 2600;
 	}
 	else if(this.species > 2) { // Green/Blue
 		this.red = 5;
@@ -45,9 +55,9 @@ Creature.prototype.setColor = function () {
     	this.blue = 100;
         this.alpha = 0.6;
         
-//	    this.area = 400
-//	    this.deathArea = 100 * Math.PI;
-//	    this.mitosisArea = this.area + 100;
+	    this.area = 1500;
+	    this.deathArea = 900;
+	    this.mitosisArea = 1600;
 	}
 	else if(this.species > 1) { // Red Brown
 		this.red = 160;
@@ -55,9 +65,9 @@ Creature.prototype.setColor = function () {
     	this.blue = 30;
         this.alpha = 0.6;
         
-//        this.area = 400
-//	    this.deathArea = 100 * Math.PI;
-//	    this.mitosisArea = this.area + 100;
+        this.area = 1000;
+	    this.deathArea = 500;
+	    this.mitosisArea = 1100;
 	}
 	else { // Yellow
 		this.red = 250;
@@ -65,9 +75,9 @@ Creature.prototype.setColor = function () {
 		this.blue = 50;
 	    this.alpha = 0.6;
 	    
-//	    this.area = 400
-//	    this.deathArea = 100 * Math.PI;
-//	    this.mitosisArea = this.area + 100;
+	    this.area = 400;
+	    this.deathArea = 380;
+	    this.mitosisArea = 420;
 	}
 }
 
@@ -86,7 +96,8 @@ Creature.prototype.draw = function (tick, ctx) {
     
     var tempAlpha = this.alpha;
     var deltaArea = this.area - this.deathArea;
-    if(deltaArea < (this.alpha * 100)) tempAlpha -= (Math.abs((this.alpha * 100) - deltaArea) / 100);
+    //if(deltaArea < (this.alpha * 100)) tempAlpha -= (Math.abs((this.alpha * 100) - deltaArea) / 100);
+    if(deltaArea < (this.alpha * 100)) tempAlpha -= this.alpha - (deltaArea + this.alpha*100) / 200;
     ctx.fillStyle = "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + tempAlpha + ")";
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, true); 
@@ -154,11 +165,11 @@ Creature.prototype.update = function () {
 }
 
 Creature.prototype.collide = function (theOtherEntity) {
-	if(theOtherEntity.area > this.area && !(this.markedForDeath) && theOtherEntity.species - this.species === 1) {
+	if((theOtherEntity.species - this.species) === 1 &&  !(this.markedForDeath) && theOtherEntity.area > this.area) {
 		theOtherEntity.area += this.area * 3 / 4;
 		this.markedForDeath = true;
 	}
-	else if(this.area < theOtherEntity.area && !(theOtherEntity.markedForDeath) && this.species - theOtherEntity.species === 1) {
+	else if(this.species - theOtherEntity.species === 1 && !(theOtherEntity.markedForDeath) && this.area < theOtherEntity.area) {
 		this.area += theOtherEntity.area * 3 / 4;
 		theOtherEntity.markedForDeath = true;
 	}
@@ -210,11 +221,11 @@ AM.downloadAll(function () {
     gameEngine.addCreature(new Background(gameEngine, AM.getAsset("./img/Cell_Background.png")));
     
 
-    var numberOfTypes = 4; // 4 is standard
-    var initialCreatures = 50;
+    var numberOfTypes = 5; // 4 is standard
+    var initialCreatures = 80;
     var multiplyer = 1;
+    var smallestGroupSize = Math.max(Math.floor(initialCreatures / ((Math.pow(2, numberOfTypes) - 1))), 1);
     
-    var smallestGroupSize = Math.floor(initialCreatures / ((Math.pow(2, numberOfTypes) - 1)));
     for(var type = numberOfTypes; type > 0; type--) {
 	    for(var i = 0; i < (smallestGroupSize * multiplyer); i++) {
 	    	gameEngine.addCreature(new Creature(gameEngine, i, type));
