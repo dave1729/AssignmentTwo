@@ -9,11 +9,13 @@ function Creature(game, id, species) {
     this.game = game;
 	this.id = id;
     this.species = species;
-    this.area = 400
-    if(this.species !== 1) this.area += 1000 + (500 * species);
-    this.deathArea = 100 * Math.PI;
-    if(this.species !== 1) this.deathArea += (500 * (species - 1));
-    this.mitosisArea = this.area + 100;
+    
+//    this.area = 400
+//    if(this.species !== 1) this.area += 1000 + (500 * species);
+//    this.deathArea = 100 * Math.PI;
+//    if(this.species !== 1) this.deathArea += (500 * (species - 1));
+//    this.mitosisArea = this.area + 100;
+    
     this.radius = Math.sqrt(this.area / Math.PI);
     this.x = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
     this.y = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
@@ -32,24 +34,40 @@ Creature.prototype.setColor = function () {
     	this.green = 75;
     	this.blue = 55;
         this.alpha = 0.6;
+        
+//	    this.area = 400;
+//	    this.deathArea = 100 * Math.PI;
+//	    this.mitosisArea = this.area + 100;
 	}
 	else if(this.species > 2) { // Green/Blue
 		this.red = 5;
     	this.green = 15;
     	this.blue = 100;
         this.alpha = 0.6;
+        
+//	    this.area = 400
+//	    this.deathArea = 100 * Math.PI;
+//	    this.mitosisArea = this.area + 100;
 	}
 	else if(this.species > 1) { // Red Brown
 		this.red = 160;
     	this.green = 10;
     	this.blue = 30;
         this.alpha = 0.6;
+        
+//        this.area = 400
+//	    this.deathArea = 100 * Math.PI;
+//	    this.mitosisArea = this.area + 100;
 	}
 	else { // Yellow
 		this.red = 250;
 		this.green = 230;
 		this.blue = 50;
 	    this.alpha = 0.6;
+	    
+//	    this.area = 400
+//	    this.deathArea = 100 * Math.PI;
+//	    this.mitosisArea = this.area + 100;
 	}
 }
 
@@ -193,7 +211,7 @@ AM.downloadAll(function () {
     
 
     var numberOfTypes = 4; // 4 is standard
-    var initialCreatures = 30;
+    var initialCreatures = 50;
     var multiplyer = 1;
     
     var smallestGroupSize = Math.floor(initialCreatures / ((Math.pow(2, numberOfTypes) - 1)));
