@@ -106,6 +106,7 @@ GameEngine.prototype.draw = function () {
     		var entity = this.entities[i];
     		click = this.im.getClick();
     		if(click !== null && hitEachother(entity, click)) {
+    			alert(entity.toString());
 				this.im.resetClick();
 			}
     	}

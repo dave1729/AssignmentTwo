@@ -10,13 +10,6 @@ function Creature(game, id, species) {
 	this.id = id;
     this.species = species;
     this.setColor();
-    
-//    this.area = 400
-//    if(this.species !== 1) this.area += 1000 + (500 * species);
-//    this.deathArea = 100 * Math.PI;
-//    if(this.species !== 1) this.deathArea += (500 * (species - 1));
-//    this.mitosisArea = this.area + 100;
-    
     this.radius = Math.sqrt(this.area / Math.PI);
     this.x = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
     this.y = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
@@ -29,8 +22,8 @@ function Creature(game, id, species) {
 Creature.prototype.setColor = function () {
 	if(this.species > 4) { // Dark Green
 		this.red = (this.species * 997) % 255;
-    	this.green = (this.species * 1009) % 255;
-    	this.blue = (this.species * 1777) % 255;
+    	this.green = (this.species * 1777) % 255;
+    	this.blue = (this.species * 1009) % 255;
         this.alpha = 0.6;
         this.speed = 10;
 	    this.area = 500 * this.species + 500;
@@ -42,8 +35,8 @@ Creature.prototype.setColor = function () {
     	this.green = 75;
     	this.blue = 55;
         this.alpha = 0.6;
-        this.speed = 30;
-	    this.area = 2000;
+        this.speed = 35;
+	    this.area = 2200;
 	    this.deathArea = 1900;
 	    this.mitosisArea = 4500;
 	}
@@ -54,7 +47,7 @@ Creature.prototype.setColor = function () {
         this.alpha = 0.6;
         this.speed = 50;
 	    this.area = 1500;
-	    this.deathArea = 750;
+	    this.deathArea = 800;
 	    this.mitosisArea = 1900;
 	}
 	else if(this.species === 2) { // Red Brown
@@ -112,6 +105,7 @@ Creature.prototype.update = function () {
 	if(this.species !== 1) {
 		var onEdge = false;
 		
+		//cells slowly loose mass, based on their luck value
 		if(Math.floor(Math.random() * 10) <= this.badLuck ) {
 			this.area -= (this.area * this.area / MAX_SIZE) * Math.random();
 			this.radius = Math.sqrt(this.area / Math.PI);
@@ -128,9 +122,13 @@ Creature.prototype.update = function () {
 			geneticCopy.y = this.y;
 			geneticCopy.area = this.area;
 			geneticCopy.radius = this.radius;
-			//geneticCopy.speed = this.speed + Math.floor((Math.random * 2) - 1);
-			//geneticCopy.deathArea = this.deathArea + (Math.random * 4) - 2;
-			//geneticCopy.mitosisArea = this.mitosisArea + (Math.random * 4) - 2;
+			geneticCopy.badLuck = this.badLuck;
+			geneticCopy.speed = this.speed + Math.floor((Math.random() * 2) - 1);
+			geneticCopy.deathArea = this.deathArea +  Math.floor((Math.random() * 4) - 2);
+			geneticCopy.mitosisArea = this.mitosisArea +  Math.floor((Math.random() * 4) - 2);
+			geneticCopy.red = (geneticCopy.red + Math.floor(Math.random() * 40 - 20)) % 255;
+			geneticCopy.green = (geneticCopy.green + Math.floor(Math.random() * 40 - 20)) % 255;
+			geneticCopy.blue = (geneticCopy.blue + Math.floor(Math.random() * 40 - 20)) % 255;
 			//alert(geneticCopy);
 			this.game.addCreature(geneticCopy);
 		}
