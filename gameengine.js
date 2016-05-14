@@ -54,7 +54,6 @@ GameEngine.prototype.update = function () {
 }
 
 GameEngine.prototype.deleteTheDead = function () {
-
     //kill creatures that are too small to live or eaten
     for (var i = 0; i < this.entities.length; i++) {
     	if(this.entities[i].markedForDeath) {
@@ -64,18 +63,18 @@ GameEngine.prototype.deleteTheDead = function () {
 }
 
 GameEngine.prototype.collision = function () {
-    var entitiesCount = this.entities.length;
+    //var entitiesCount = this.entities.length;
     
     //for each creature
-    for (var i = 0; i < entitiesCount; i++) {
+    for (var i = 0; i < this.entities.length; i++) {
     	//check it against all other creatures
-    	for(var j = 0; j < entitiesCount; j++) {
+    	for(var j = 0; j < this.entities.length; j++) {
     		//check only if your not checking itself
     		if(i !== j) {
-    			var you = this.entities[i];
-    			var them = this.entities[j];
-    			if(hitEachother(you, them)) {
-    				you.collide(them);
+    			//var you = this.entities[i];
+    			//var them = this.entities[j];
+    			if(hitEachother(this.entities[i], this.entities[j])) {
+    				this.entities[i].collide(this.entities[j]);
     			}
     		}
     	}
@@ -106,9 +105,7 @@ GameEngine.prototype.draw = function () {
     	if(this.im.checkMouse()) {
     		var entity = this.entities[i];
     		click = this.im.getClick();
-    		console.log((click !== null) + " " + hitEachother(entity, click));
     		if(click !== null && hitEachother(entity, click)) {
-				alert(entity.toString());
 				this.im.resetClick();
 			}
     	}
@@ -117,14 +114,14 @@ GameEngine.prototype.draw = function () {
 
 var hitEachother = function (entity1, entity2) {
 	//alert("in hitEachother");
-	if(entity1 !== null && entity2 !== null) {
+	if((entity1 !== null) && (entity2 !== null)) {
 		var deltaX = entity2.x-entity1.x;
-		var deltaY = entity1.y-entity2.y;
-		var sigmaRadii = entity1.radius+entity2.radius;
+		var deltaY = entity2.y-entity1.y;
+		var sigmaRadii = entity2.radius+entity1.radius;
 //		if(!(Math.pow(sigmaRadii, 2) > 0)) {
 //			alert(entity1.id + " " + entity2.id);
 //		}
-		return Math.pow(deltaX, 2) + Math.pow(deltaY, 2) <= Math.pow(sigmaRadii, 2);
+		return (Math.pow(deltaX, 2) + Math.pow(deltaY, 2)) <= Math.pow(sigmaRadii, 2);
 	}
 	else {
 		return false;

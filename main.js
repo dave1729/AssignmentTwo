@@ -20,8 +20,6 @@ function Creature(game, id, species) {
     this.radius = Math.sqrt(this.area / Math.PI);
     this.x = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
     this.y = (768 - 4 * this.radius) * Math.random() + (2 * this.radius);
-    this.speed = 0;
-    if(this.species !== 1) this.speed = 60;
     this.direction = 2 * Math.PI * Math.random();
 	this.markedForDeath = false;
     this.badLuck = Math.floor(Math.random() * 10);
@@ -34,49 +32,49 @@ Creature.prototype.setColor = function () {
     	this.green = (this.species * 1009) % 255;
     	this.blue = (this.species * 1777) % 255;
         this.alpha = 0.6;
-        
+        this.speed = 10;
 	    this.area = 500 * this.species + 500;
-	    this.deathArea = 500 * this.species - 500;
+	    this.deathArea = 500 * this.species - 1000;
 	    this.mitosisArea = 500 * this.species + 600;
 	}
-		else if(this.species > 3) { // Dark Green
+		else if(this.species === 4) { // Dark Green
 		this.red = 10;
     	this.green = 75;
     	this.blue = 55;
         this.alpha = 0.6;
-        
+        this.speed = 30;
 	    this.area = 2000;
-	    this.deathArea = 1400;
-	    this.mitosisArea = 2600;
+	    this.deathArea = 1900;
+	    this.mitosisArea = 4500;
 	}
-	else if(this.species > 2) { // Green/Blue
+	else if(this.species === 3) { // Blue
 		this.red = 5;
     	this.green = 15;
     	this.blue = 100;
         this.alpha = 0.6;
-        
+        this.speed = 50;
 	    this.area = 1500;
-	    this.deathArea = 900;
-	    this.mitosisArea = 1600;
+	    this.deathArea = 750;
+	    this.mitosisArea = 1900;
 	}
-	else if(this.species > 1) { // Red Brown
+	else if(this.species === 2) { // Red Brown
 		this.red = 160;
     	this.green = 10;
     	this.blue = 30;
         this.alpha = 0.6;
-        
-        this.area = 1000;
+        this.speed = 60;
+        this.area = 950;
 	    this.deathArea = 500;
 	    this.mitosisArea = 1100;
 	}
-	else { // Yellow
+	else if(this.species === 1) { // Yellow
 		this.red = 250;
 		this.green = 230;
 		this.blue = 50;
 	    this.alpha = 0.6;
-	    
+	    this.speed = 0;
 	    this.area = 400;
-	    this.deathArea = 380;
+	    this.deathArea = 300;
 	    this.mitosisArea = 420;
 	}
 }
@@ -130,6 +128,10 @@ Creature.prototype.update = function () {
 			geneticCopy.y = this.y;
 			geneticCopy.area = this.area;
 			geneticCopy.radius = this.radius;
+			//geneticCopy.speed = this.speed + Math.floor((Math.random * 2) - 1);
+			//geneticCopy.deathArea = this.deathArea + (Math.random * 4) - 2;
+			//geneticCopy.mitosisArea = this.mitosisArea + (Math.random * 4) - 2;
+			//alert(geneticCopy);
 			this.game.addCreature(geneticCopy);
 		}
 		
@@ -165,15 +167,26 @@ Creature.prototype.update = function () {
 }
 
 Creature.prototype.collide = function (theOtherEntity) {
-	if((theOtherEntity.species - this.species) === 1 &&  !(this.markedForDeath) && theOtherEntity.area > this.area) {
-		theOtherEntity.area += this.area * 3 / 4;
-		this.markedForDeath = true;
-	}
-	else if(this.species - theOtherEntity.species === 1 && !(theOtherEntity.markedForDeath) && this.area < theOtherEntity.area) {
-		this.area += theOtherEntity.area * 3 / 4;
+	if(this.canEat(theOtherEntity)) {
+		this.area = this.area + (theOtherEntity.area / 2);
 		theOtherEntity.markedForDeath = true;
 	}
+//	else if(theOtherEntity.canEat(this)) {
+//		theOtherEntity.area += this.area * 3 / 4;
+//		this.markedForDeath = true;
+//	}
 }
+
+Creature.prototype.canEat = function (theOtherEntity) {
+	var canEat = false;
+	if(((this.species - theOtherEntity.species) === 1) && !(theOtherEntity.markedForDeath) &&
+		!(this.markedForDeath) && (theOtherEntity.area < this.area)) {
+		canEat = true;
+	}
+	return canEat;
+}
+
+
 
 Creature.prototype.currentFrame = function () {
     return Math.floor(this.elapsedTime / this.frameDuration);
@@ -220,9 +233,8 @@ AM.downloadAll(function () {
 
     gameEngine.addCreature(new Background(gameEngine, AM.getAsset("./img/Cell_Background.png")));
     
-
-    var numberOfTypes = 5; // 4 is standard
-    var initialCreatures = 80;
+    var numberOfTypes = 4; // 4 is standard
+    var initialCreatures = 45;
     var multiplyer = 1;
     var smallestGroupSize = Math.max(Math.floor(initialCreatures / ((Math.pow(2, numberOfTypes) - 1))), 1);
     
