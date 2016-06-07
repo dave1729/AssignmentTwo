@@ -207,7 +207,7 @@ function Background(game, spritesheet) {
     this.spritesheet = spritesheet;
     this.x = 0;
     this.y = 0;
-    this.layer = 1;
+    this.species = -1;
     this.ctx = game.ctx;
 };
 
@@ -228,8 +228,6 @@ AM.downloadAll(function () {
     var gameEngine = new GameEngine();
     gameEngine.init(ctx);
     gameEngine.start();
-
-    gameEngine.addCreature(new Background(gameEngine, AM.getAsset("./img/Cell_Background.png")));
     
     var numberOfTypes = 4; // 4 is standard
     var initialCreatures = 45;
