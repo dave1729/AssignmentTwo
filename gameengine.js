@@ -1,4 +1,3 @@
-
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -12,16 +11,47 @@ window.requestAnimFrame = (function () {
 
 function GameEngine() {
     this.entities = [];
+    this.socket = null;
+    this.background = null;
     this.entitiesCount = 0;
     this.im = null;
+    this.db = null;
     this.click = null;
     this.ctx = null;
 }
 
 GameEngine.prototype.init = function (ctx) {
+	var that = this;
     this.ctx = ctx;
+    this.socket = io.connect("http://76.28.150.193:8888");
+    this.socket.on("load", function (data) {
+    	for (var i = 0; i < data.creatureList.length; i++) {
+    	    var newCreature = new Creature(that, data.creatureList[i].id, data.creatureList[i].species);
+    	    newCreature.id = data.creatureList[i].id;
+    	    newCreature.species = data.creatureList[i].species;
+    	    newCreature.radius = data.creatureList[i].radius;
+    	    newCreature.x = data.creatureList[i].x;
+    	    newCreature.y = data.creatureList[i].y;
+    	    newCreature.direction = data.creatureList[i].direction;
+    	    newCreature.markedForDeath = data.creatureList[i].markedForDeath;
+    	    newCreature.badLuck = data.creatureList[i].badLuck;
+    	    newCreature.red = data.creatureList[i].red;
+    	    newCreature.green = data.creatureList[i].green;
+    	    newCreature.blue = data.creatureList[i].blue;
+    	    newCreature.alpha = data.creatureList[i].alpha;
+    	    newCreature.speed = data.creatureList[i].speed;
+    	    newCreature.area = data.creatureList[i].area;
+    	    newCreature.deathArea = data.creatureList[i].deathArea;
+    	    newCreature.mitosisArea = data.creatureList[i].mitosisArea;
+    	    that.entities.push(newCreature);
+    	    that.entitiesCount++;
+    	}
+    });
+    this.background = new Background(this, AM.getAsset("./img/Cell_Background.png"));
     this.im = new InputManager("CreatureInfo", ctx);
     this.im.addMouse();
+    this.im.addInput(new Input("saveState", 's'));
+    this.im.addInput(new Input("loadState", 'l'));
     this.im.start();
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
@@ -86,7 +116,7 @@ GameEngine.prototype.addPlants = function () {
 }
 
 GameEngine.prototype.draw = function () {
-    
+	this.background.draw();
     //Sort entities by layer
     this.entities.sort(
         function(x, y)
@@ -106,7 +136,6 @@ GameEngine.prototype.draw = function () {
     		var entity = this.entities[i];
     		click = this.im.getClick();
     		if(click !== null && hitEachother(entity, click)) {
-    			alert(entity.toString());
 				this.im.resetClick();
 			}
     	}
@@ -136,6 +165,48 @@ GameEngine.prototype.loop = function () {
     this.collision();
     this.addPlants();
     this.draw();
+    if(this.im.checkInput("saveState")) {
+    	this.saveEntities();
+    	alert("Current State Saved!");
+    }
+    else if (this.im.checkInput("loadState")) {
+    	this.loadEntities();
+    	alert("Previous State Loaded!");
+    }
+}
+
+
+GameEngine.prototype.saveEntities = function () {
+	var that = this;
+	var creatureList = [];
+	for (var i = 0; i < this.entities.length; i++) {
+		creatureList.push({
+			id: that.entities[i].id,
+			species: that.entities[i].species,
+			radius: that.entities[i].radius,
+			x: that.entities[i].x,
+			y: that.entities[i].y,
+			direction: that.entities[i].direction,
+			markedForDeath: that.entities[i].markedForDeath,
+			badLuck: that.entities[i].badLuck,
+		    red: that.entities[i].red,
+	    	green: that.entities[i].green,
+	    	blue: that.entities[i].blue,
+	        alpha: that.entities[i].alpha,
+	        speed: that.entities[i].speed,
+		    area: that.entities[i].area,
+		    deathArea: that.entities[i].deathArea,
+		    mitosisArea: that.entities[i].mitosisArea
+		    });
+	}
+	this.socket.emit("save", { studentname: "David Humphreys", statename: "SimulationState", creatureList: creatureList});
+}
+
+
+GameEngine.prototype.loadEntities = function () {
+	this.entities = [];
+	this.entitiesCount = this.entities.length;
+	this.socket.emit("load", { studentname: "David Humphreys", statename: "SimulationState"});
 }
 
 function Timer() {

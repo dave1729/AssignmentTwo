@@ -9,7 +9,7 @@ function InputManager(firstGroupName, ctx) {
     this.inputgroup_list.push(this.currentgroup);
 }
 
-//Adds a new group and switches to it right stat now
+//Adds a new group and switches to it
 //addGroup(String)
 InputManager.prototype.addGroup = function(newGroupName, ctx) {
 	this.currentgroup = new InputGroup(newGroupName);
