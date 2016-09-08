@@ -184,7 +184,12 @@ Creature.prototype.canEat = function (theOtherEntity) {
 	return canEat;
 }
 
-
+Creature.prototype.colorDistance = function (theOtherEntity) {
+	var dRed = this.red - theOtherEntity.red;
+	var dGreen = this.green - theOtherEntity.green;
+	var dBlue = this.blue - theOtherEntity.blue;
+	return Math.sqrt(dRed * dRed + dGreen * dGreen + dBlue * dBlue);
+}
 
 Creature.prototype.currentFrame = function () {
     return Math.floor(this.elapsedTime / this.frameDuration);
