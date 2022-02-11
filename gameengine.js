@@ -11,7 +11,7 @@ window.requestAnimFrame = (function () {
 
 function GameEngine() {
     this.entities = [];
-    this.socket = null;
+    //this.socket = null;
     this.background = null;
     this.entitiesCount = 0;
     this.im = null;
@@ -23,6 +23,8 @@ function GameEngine() {
 GameEngine.prototype.init = function (ctx) {
 	var that = this;
     this.ctx = ctx;
+    //Repo Stuff
+    /*
     this.socket = io.connect("http://76.28.150.193:8888");
     this.socket.on("load", function (data) {
     	for (var i = 0; i < data.creatureList.length; i++) {
@@ -47,6 +49,7 @@ GameEngine.prototype.init = function (ctx) {
     	    that.entitiesCount++;
     	}
     });
+    */
     this.background = new Background(this, AM.getAsset("./img/Cell_Background.png"));
     this.im = new InputManager("CreatureInfo", ctx);
     this.im.addMouse();
@@ -112,7 +115,7 @@ GameEngine.prototype.collision = function () {
 }
 
 GameEngine.prototype.addPlants = function () {
-	if(Math.random() > 0.95) this.addCreature(new Creature(this, 1111, 1));
+	if(Math.random() > 0.90) this.addCreature(new Creature(this, 1111, 1));
 }
 
 GameEngine.prototype.draw = function () {
@@ -166,11 +169,12 @@ GameEngine.prototype.loop = function () {
     this.addPlants();
     this.draw();
     if(this.im.checkInput("saveState")) {
-    	this.saveEntities();
+    	//this.saveEntities();
     	alert("Current State Saved!");
+    	
     }
     else if (this.im.checkInput("loadState")) {
-    	this.loadEntities();
+    	//this.loadEntities();
     	alert("Previous State Loaded!");
     }
 }
@@ -199,14 +203,14 @@ GameEngine.prototype.saveEntities = function () {
 		    mitosisArea: that.entities[i].mitosisArea
 		    });
 	}
-	this.socket.emit("save", { studentname: "David Humphreys", statename: "SimulationState", creatureList: creatureList});
+	//this.socket.emit("save", { studentname: "David Humphreys", statename: "SimulationState", creatureList: creatureList});
 }
 
 
 GameEngine.prototype.loadEntities = function () {
 	this.entities = [];
 	this.entitiesCount = this.entities.length;
-	this.socket.emit("load", { studentname: "David Humphreys", statename: "SimulationState"});
+	//this.socket.emit("load", { studentname: "David Humphreys", statename: "SimulationState"});
 }
 
 function Timer() {
