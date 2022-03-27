@@ -1,4 +1,5 @@
 var AM = new AssetManager();
+var gameEngine = new GameEngine();
 
 const MAX_SIZE = 5000000;
 
@@ -17,6 +18,25 @@ function Creature(game, id, species) {
 	this.markedForDeath = false;
     this.badLuck = Math.floor(Math.random() * 10);
     //this.dna = "10011100";
+}
+
+Creature.fromDynamic = function(game, object) {
+	var newCreature = new Creature(game, object.id, object.species);
+	newCreature.radius = object.radius;
+	newCreature.x = object.x;
+	newCreature.y = object.y;
+	newCreature.direction = object.direction;
+	newCreature.markedForDeath = object.markedForDeath;
+	newCreature.badLuck = object.badLuck;
+	newCreature.red = object.red;
+	newCreature.green = object.green;
+	newCreature.blue = object.blue;
+	newCreature.alpha = object.alpha;
+	newCreature.speed = object.speed;
+	newCreature.area = object.area;
+	newCreature.deathArea = object.deathArea;
+	newCreature.mitosisArea = object.mitosisArea;
+	return newCreature;
 }
 
 Creature.prototype.setColor = function () {
@@ -229,8 +249,6 @@ AM.queueDownload("./img/Cell_Background.png");
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
     var ctx = canvas.getContext("2d");
-
-    var gameEngine = new GameEngine();
     gameEngine.init(ctx);
     gameEngine.start();
     

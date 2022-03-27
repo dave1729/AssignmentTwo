@@ -50,6 +50,9 @@ InputManager.prototype.checkInput = function(theName) {
 	for(var i = 0; i < this.currentgroup.input_list.length; i++) {
 		if(this.currentgroup.input_list[i].name === theName) {
 			initiated = this.currentgroup.input_list[i].isPressed;
+			if(initiated){
+				this.currentgroup.input_list[i].isPressed = false;
+			}
 		}
 	}
 	return initiated;

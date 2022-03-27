@@ -79,10 +79,15 @@ GameEngine.prototype.addCreature = function (creature) {
 
 GameEngine.prototype.update = function () {
     var entitiesCount = this.entities.length;
-    
+    console.log('Updating entities: ' + entitiesCount);
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
-        entity.update();
+		
+		console.log('Updating entity: ' + entity);
+		// hack because the load feature seems to hit this undefgined case.
+		if(entity != undefined && entity != null){
+            entity.update();
+		}
     }
 }
 
@@ -169,12 +174,12 @@ GameEngine.prototype.loop = function () {
     this.addPlants();
     this.draw();
     if(this.im.checkInput("saveState")) {
-    	//this.saveEntities();
+    	this.saveEntities();
     	alert("Current State Saved!");
     	
     }
     else if (this.im.checkInput("loadState")) {
-    	//this.loadEntities();
+    	this.loadEntities();
     	alert("Previous State Loaded!");
     }
 }
@@ -203,14 +208,25 @@ GameEngine.prototype.saveEntities = function () {
 		    mitosisArea: that.entities[i].mitosisArea
 		    });
 	}
-	//this.socket.emit("save", { studentname: "David Humphreys", statename: "SimulationState", creatureList: creatureList});
+
+	var myJSON = JSON.stringify(creatureList);
+	saveJson(myJSON, undefined);
 }
 
 
 GameEngine.prototype.loadEntities = function () {
-	this.entities = [];
-	this.entitiesCount = this.entities.length;
-	//this.socket.emit("load", { studentname: "David Humphreys", statename: "SimulationState"});
+	getJson(function(myJson) {
+		// referencing gameEngine globally here so the callback can see the instance.
+		while(gameEngine.entities.pop() != undefined){
+		}
+		gameEngine.entitiesCount = 0;
+		var creatureList = JSON.parse(myJson);
+		for(var i = 0; i < creatureList.length; i++) {
+			var creature = Creature.fromDynamic(gameEngine, creatureList[i]);
+			gameEngine.entities.push(creature);
+		}
+		gameEngine.entitiesCount = gameEngine.entities.length;
+	});
 }
 
 function Timer() {
