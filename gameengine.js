@@ -1,5 +1,3 @@
-import { saveJson } from "./storagemanager.js";
-
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
